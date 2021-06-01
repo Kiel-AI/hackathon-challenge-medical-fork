@@ -27,24 +27,20 @@ const mapObjectToArray = (object: {[key: string]: any}) => {
   });
 };
 
+let bestScore = '';
+let lastScore = '';
+
 const Scores = () => {
   const {challenge, team} = useAuthContext();
 
   const [scores, setScores] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
 
-  let myScore = scores.map((value: any) => {
-    if (value.team === team) {
-      return value.score;
-    } else {
-      return "";
-    }});
-
-
   const update = (data: any) => {
     if (data.error) {
     } else if (data.improved === false) {
       console.log("The score for the last attempt (which did not improve) was", data.newScore);
+      lastScore = data.newScore;
       setOpen(true);
     } else {
       setScores(mapObjectToArray(data.score));
@@ -129,7 +125,7 @@ const MyResponsiveBar = ({teamName, data}: IMyResponsiveBar) => {
   }
   const layers = ['markers', 'annotations', 'grid', 'bars', 'legends', 'axes'];
 
-  const myScore = data.map((value: any) => {
+  bestScore = data.map((value: any) => {
     if (value.team === teamName) {
       return value.score;
     } else {
@@ -137,6 +133,7 @@ const MyResponsiveBar = ({teamName, data}: IMyResponsiveBar) => {
     }});
 
   return (
+    <React.Fragment>
     <Box height={`${data.length * 50 + 30}px`}>
       <ResponsiveBar
         animate={true}
@@ -235,8 +232,12 @@ const MyResponsiveBar = ({teamName, data}: IMyResponsiveBar) => {
         motionStiffness={90}
         padding={0.3}
       />
-      <Typography variant="body2">Your score is {myScore}</Typography>
     </Box>
+    <Box pt={4}>
+      <Typography >Your best score is {bestScore}</Typography>
+      <Typography >Your last attempt was {lastScore}</Typography>
+    </Box>
+    </React.Fragment>
   );
 };
 
