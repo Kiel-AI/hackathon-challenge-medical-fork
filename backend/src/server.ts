@@ -635,7 +635,7 @@ const truePredictionsArray: Map<string, number> = new Map([
  */
 const server = async () => {
   redis.hmset(
-    'hackathon:challenge:covid',
+    'hackathon:challenge:medical',
     'numberOfEntries',
     truePredictionsArray.size,
     ...truePredictionsArray.entries(),
