@@ -22,7 +22,7 @@ const mapObjectToArray = (object: {[key: string]: any}) => {
   return Object.keys(object).map((team) => {
     return {
       team,
-      score: parseInt(object[team], 10),
+      score: parseFloat(object[team]),
     };
   });
 };
@@ -33,9 +33,18 @@ const Scores = () => {
   const [scores, setScores] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
 
+  let myScore = scores.map((value: any) => {
+    if (value.team === team) {
+      return value.score;
+    } else {
+      return "";
+    }});
+
+
   const update = (data: any) => {
     if (data.error) {
     } else if (data.improved === false) {
+      console.log("The score for the last attempt (which did not improve) was", data.newScore);
       setOpen(true);
     } else {
       setScores(mapObjectToArray(data.score));
@@ -118,8 +127,14 @@ const MyResponsiveBar = ({teamName, data}: IMyResponsiveBar) => {
   if (!data) {
     return null;
   }
-
   const layers = ['markers', 'annotations', 'grid', 'bars', 'legends', 'axes'];
+
+  const myScore = data.map((value: any) => {
+    if (value.team === teamName) {
+      return value.score;
+    } else {
+      return "";
+    }});
 
   return (
     <Box height={`${data.length * 50 + 30}px`}>
@@ -162,7 +177,7 @@ const MyResponsiveBar = ({teamName, data}: IMyResponsiveBar) => {
                   textAnchor="start"
                   transform={`translate(${data.x + 10}, ${data.y - 7}) rotate(${data.rotate})`}
                   style={{
-                    fill: 'rgba(255, 255, 255, 1)',
+                    fill: 'rgba(0, 0, 0, 1)',
                     textShadow: '1px 1px 3px rgba(0 , 0, 0, 0.1)',
                     fontSize: '12px',
                     fontWeight: 700,
@@ -214,12 +229,13 @@ const MyResponsiveBar = ({teamName, data}: IMyResponsiveBar) => {
         layout="horizontal"
         legends={[]}
         margin={{top: 0, right: 10, bottom: 30, left: 5}}
-        maxValue={100}
+        maxValue={5}
         minValue={0}
         motionDamping={15}
         motionStiffness={90}
         padding={0.3}
       />
+      <Typography variant="body2">Your score is {myScore}</Typography>
     </Box>
   );
 };

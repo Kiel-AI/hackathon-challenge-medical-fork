@@ -13,12 +13,14 @@ const getScore = async (predictions: Map<any, any>, challenge: string) => {
   );
 
   let score = 0;
-
+  let diff = 0;
   for (const [index, prediction] of [...predictions.values()].entries()) {
-    score += result[index] === prediction ? 1 : 0;
+    //console.log('res', result[index], 'pred:', prediction);
+    diff = parseFloat(result[index]) - prediction;
+    score += diff * diff;
   }
-
-  return (score / parseInt(numberOfEntries, 10)) * 100;
+  console.log('score', score);
+  return score; //(score / parseInt(numberOfEntries, 10)) * 100;
 };
 
 router.route('/:challenge').post(async (request: Request, response: Response) => {
@@ -27,7 +29,7 @@ router.route('/:challenge').post(async (request: Request, response: Response) =>
   const list = _.fromPairs(_.chunk(result, 2));
 
   if (!request.body.predictions) {
-    return response.send({score: list});
+    return response.send({score: list, newScore: result});
   }
 
   const score = await redis.zscore(`hackathon:top:${challenge}`, request.body.team);
@@ -48,15 +50,16 @@ router.route('/:challenge').post(async (request: Request, response: Response) =>
     newScore,
   );
 
-  if (score !== null && parseFloat(score) >= newScore) {
-    return response.send({score: list, error: undefined, improved: false});
+  console.log('score:', score, 'newScore:', newScore);
+  if (score !== null && parseFloat(score) <= newScore) {
+    return response.send({score: list, newScore: newScore, error: undefined, improved: false});
   }
 
   await redis.zadd(`hackathon:top:${challenge}`, [newScore, request.body.team]);
 
   list[request.body.team] = newScore;
 
-  return response.send({score: list, improved: true});
+  return response.send({score: list, newScore: newScore, improved: true});
 });
 
 export default router;
